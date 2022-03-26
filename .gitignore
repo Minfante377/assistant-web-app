@@ -1,0 +1,7 @@
+*.swp
+*__pycache__
+*.log
+*venv/
+*.txt
+*credentials.json
+*client_secret.json
