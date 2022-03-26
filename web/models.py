@@ -1,3 +1,5 @@
+from random import randint
+
 from django.db import models
 
 
@@ -24,13 +26,20 @@ class Owner(models.Model):
     This model defines the Owner table.
 
     fields:
-        - owner_id(int): Unique owner id.
+        - owner_id(int): owner id.
         - email(str):
         - password(str)
         - clients(ManyToManyField): Clients associated with this owner.
 
     """
-    owner_id = models.IntegerField(primary_key=True)
+    owner_id = models.IntegerField()
     email = models.CharField(unique=True, max_length=50)
     password = models.CharField(max_length=20, null=False)
     clients = models.ManyToManyField(Client)
+
+    def __init__(self, *args, **kwargs):
+        """
+        This method initializes the owner_id with a 4 random digit integer.
+        """
+        self.owner_id = randint.random(1000, 9999)
+        super().__init__(*args, **kwargs)
