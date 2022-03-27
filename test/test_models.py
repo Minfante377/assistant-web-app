@@ -126,3 +126,33 @@ class TestCalendar(TestCase):
                 start_time=TEST_START_TIME,
                 end_time=TEST_END_TIME,
                 location='test')
+
+    def test_delete_event(self):
+        """
+        This test deletes an event.
+        """
+        Event.objects.create(
+            day=TEST_DAY,
+            start_time=TEST_START_TIME,
+            end_time=TEST_END_TIME,
+            calendar=self.calendar)
+
+        self.calendar.delete_event(day=TEST_DAY, start_time=TEST_START_TIME,
+                                   end_time=TEST_END_TIME)
+        self.assertEqual(Event.objects.filter(calendar=self.calendar).count(),
+                         0, msg='Failed to delete event')
+
+    def test_get_events(self):
+        """
+        This test get the events from the test Calendar.
+        """
+        event = Event.objects.create(
+            day=TEST_DAY,
+            start_time=TEST_START_TIME,
+            end_time=TEST_END_TIME,
+            calendar=self.calendar)
+
+        self.assertEqual(
+            event,
+            self.calendar.get_events(day=TEST_DAY)[0],
+            msg='Events werent fetched correctly')

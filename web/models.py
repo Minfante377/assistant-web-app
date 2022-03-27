@@ -127,6 +127,35 @@ class Calendar(models.Model):
             calendar=self)
         logger.log_info("New event added")
 
+    def delete_event(self, day, start_time, end_time):
+        """
+        Delete an event.
+
+        Args:
+            - day(date):
+            - start_time(time):
+            - end_time(time):
+
+        Returns(None):
+        """
+        logger.log_info("Deleting event {}:{}-{}".format(
+                        day, start_time, end_time))
+        Event.objects.filter(calendar=self, day=day, start_time=start_time,
+                             end_time=end_time).delete()
+
+    def get_events(self, **kwargs):
+        """
+        Get events linked to this calendar and filter them by kwargs
+
+        Args:
+
+        Returns(list):
+            list of Event instances.
+
+        """
+        logger.log_info("Getting event {}".format(kwargs))
+        return Event.objects.filter(calendar=self, **kwargs)
+
     def _check_overlap(self, fixed_start, fixed_end, new_start, new_end):
         """
         Check overlap between two events.
