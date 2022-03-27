@@ -75,3 +75,39 @@ class Owner(models.Model):
 
         logger.log_error("Client {} not found. Unable to delete"
                          .format(client_id_number))
+
+
+class Calendar(models.Model):
+    """
+    This model defines the Calendar table.
+
+    fields:
+        - summary(str): Calendar name.
+        - owner(Owner): The owner the calendar belongs to.
+
+    """
+    summary = models.CharField(max_length=50)
+    owner = models.ForeignKey(Owner, on_delete=models.CASCADE)
+
+
+class Event(models.Model):
+    """
+    This model defines the Event table.
+
+    fields:
+        - day(DateField):
+        - start_time(TimeField):
+        - end_time(TimeField):
+        - location(str):
+        - free(bool):
+        - client(Client):
+        - calendar(Calendar): The calendar the event belongs to.
+
+    """
+    day = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    location = models.CharField(max_length=50, null=True)
+    free = models.BooleanField(default=True)
+    client = models.OneToOneField(Client, null=True)
+    calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE)
