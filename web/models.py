@@ -35,17 +35,17 @@ class Owner(models.Model):
         - clients(ManyToManyField): Clients associated with this owner.
 
     """
-    owner_id = models.IntegerField()
+    owner_id = models.IntegerField(null=True, blank=True)
     email = models.CharField(unique=True, max_length=50)
     password = models.CharField(max_length=20)
     clients = models.ManyToManyField(Client)
 
-    def __init__(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
         """
         This method initializes the owner_id with a 4 random digit integer.
         """
-        kwargs['owner_id'] = randint(1000, 9999)
-        super().__init__(*args, **kwargs)
+        self.owner_id = randint(1000, 9999)
+        super().save(*args, **kwargs)
 
     def add_client(self, client):
         """
@@ -88,7 +88,7 @@ class Calendar(models.Model):
 
     """
     summary = models.CharField(max_length=50)
-    owner = models.ForeignKey(Owner, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Owner, on_delete=models.CASCADE, null=True)
 
     def create_event(self, day, start_time, end_time, location):
         """
