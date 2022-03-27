@@ -69,7 +69,7 @@ class TestCalendar(TestCase):
 
     def setUp(self):
         """
-        The setUp creates a test Calendar and a test Owner.
+        The setUp creates a test Calendar, a test Owner and a test Client.
         """
         self.owner = Owner.objects.create(
             email="test@test.com",
@@ -77,12 +77,19 @@ class TestCalendar(TestCase):
         self.calendar = Calendar.objects.create(
             summary="test calendar",
             owner=self.owner)
+        self.client = Client.objects.create(
+            email="test@test.com",
+            password="testPass",
+            first_name="test",
+            last_name="test",
+            identity_number=TEST_ID_NUMBER)
 
     def tearDown(self):
         """
         The tearDown deletes the test Owner and test Calendar.
         """
         self.owner.delete()
+        self.client.delete()
 
     def test_create_event(self):
         """
@@ -156,3 +163,51 @@ class TestCalendar(TestCase):
             event,
             self.calendar.get_events(day=TEST_DAY)[0],
             msg='Events werent fetched correctly')
+
+    def test_assign_event(self):
+        """
+        This test assigns a test Event to the test Client.
+        """
+        event = Event.objects.create(
+            day=TEST_DAY,
+            start_time=TEST_START_TIME,
+            end_time=TEST_END_TIME,
+            calendar=self.calendar)
+        self.calendar.assign_event(self.client.identity_number, event.day,
+                                   event.start_time, event.end_time)
+        self.assertEqual(event, Event.objects.get(client=self.client),
+                         msg="Event was not assigned")
+
+    def test_assign_event_already_assigned(self):
+        """
+        This test assigns a test Client to an already assigned event and
+        asserts an exception is raised.
+        """
+        event = Event.objects.create(
+            day=TEST_DAY,
+            start_time=TEST_START_TIME,
+            end_time=TEST_END_TIME,
+            calendar=self.calendar,
+            free=False)
+        with self.assertRaises(ValidationError,
+                               msg='An event cannot be assigned twice'):
+            self.calendar.assign_event(self.client.identity_number, event.day,
+                                       event.start_time, event.end_time)
+
+    def test_free_event(self):
+        """
+        This test frees an event.
+        """
+        event = Event.objects.create(
+            day=TEST_DAY,
+            start_time=TEST_START_TIME,
+            end_time=TEST_END_TIME,
+            calendar=self.calendar,
+            free=False,
+            client=self.client)
+        self.calendar.free_event(day=event.day, start_time=event.start_time,
+                                 end_time=event.end_time)
+        msg = 'Event was not freed correctly'
+        event.refresh_from_db()
+        self.assertEqual(event.free, True, msg=msg)
+        self.assertEqual(event.client, None, msg=msg)

@@ -156,6 +156,57 @@ class Calendar(models.Model):
         logger.log_info("Getting event {}".format(kwargs))
         return Event.objects.filter(calendar=self, **kwargs)
 
+    def assign_event(self, client_id_number, day, start_time, end_time):
+        """
+        Assign a free event to a client.
+
+        Args:
+            - day(date):
+            - start_time(time):
+            - end_time(time):
+            - client_id_number(int):
+
+        Returns(None):
+
+        """
+        logger.log_info("Assigning event {}:{}-{} to client {}"
+                        .format(day, start_time, end_time, client_id_number))
+        event = Event.objects.get(
+            day=day,
+            start_time=start_time,
+            end_time=end_time,
+            calendar=self)
+        if not event.free:
+            logger.log_error("Event is already taken")
+            raise ValidationError("Event is already taken")
+
+        client = Client.objects.get(identity_number=client_id_number)
+        event.client = client
+        event.free = False
+        event.save()
+
+    def free_event(self, day, start_time, end_time):
+        """
+        Free event.
+
+        Args:
+            - day(date):
+            - start_time(time):
+            - end_time(time):
+
+        Returns(None):
+        """
+        logger.log_info("Freing Event {}:{}-{}"
+                        .format(day, start_time, end_time))
+        event = Event.objects.get(
+            day=day,
+            start_time=start_time,
+            end_time=end_time,
+            calendar=self)
+        event.client = None
+        event.free = True
+        event.save()
+
     def _check_overlap(self, fixed_start, fixed_end, new_start, new_end):
         """
         Check overlap between two events.
