@@ -3,6 +3,7 @@ from random import randint
 from utils.logger import logger
 
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class Client(models.Model):
@@ -89,6 +90,67 @@ class Calendar(models.Model):
     summary = models.CharField(max_length=50)
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE)
 
+    def create_event(self, day, start_time, end_time, location):
+        """
+        Creates a new event on this calendar.
+
+        Args:
+            - day(date):
+            - start_time(time):
+            - end_time(time):
+            - location(string):
+
+        Returns(None):
+
+        """
+        if end_time <= start_time:
+            logger.log_error("End time must be greater than start time")
+            raise ValidationError("End time must be greater than start time")
+
+        events = Event.objects.filter(day=day, calendar=self)
+        if events.exists():
+            for event in events:
+                if self._check_overlap(
+                        event.start_time,
+                        event.end_time,
+                        start_time,
+                        end_time):
+                    logger.log_error("This event overlaps with another event")
+                    raise ValidationError(
+                        "This event overlaps with another event")
+
+        Event.objects.create(
+            day=day,
+            start_time=start_time,
+            end_time=end_time,
+            location=location,
+            calendar=self)
+        logger.log_info("New event added")
+
+    def _check_overlap(self, fixed_start, fixed_end, new_start, new_end):
+        """
+        Check overlap between two events.
+
+        Args:
+            - fixed_start(time):
+            - fixed_end(time):
+            - new_start(time):
+            - new_end(time):
+
+        Returns(bool):
+            True means overlap.
+
+        """
+        overlap = False
+
+        if (new_start >= fixed_start and new_start <= fixed_end) or \
+                (new_end >= fixed_start and new_end <= fixed_end):
+            overlap = True
+        elif new_start <= fixed_start and new_end >= fixed_end:
+            overlap = True
+
+        return overlap
+
 
 class Event(models.Model):
     """
@@ -109,5 +171,6 @@ class Event(models.Model):
     end_time = models.TimeField()
     location = models.CharField(max_length=50, null=True)
     free = models.BooleanField(default=True)
-    client = models.OneToOneField(Client, null=True)
+    client = models.OneToOneField(Client, null=True,
+                                  on_delete=models.DO_NOTHING)
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE)
