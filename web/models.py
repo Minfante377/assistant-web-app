@@ -23,6 +23,10 @@ class Client(models.Model):
     last_name = models.CharField(max_length=20)
     identity_number = models.IntegerField(unique=True)
 
+    def __str__(self):
+        return "{} {} - {}".format(self.first_name, self.last_name,
+                                   self.identity_number)
+
 
 class Owner(models.Model):
     """
@@ -39,6 +43,9 @@ class Owner(models.Model):
     email = models.CharField(unique=True, max_length=50)
     password = models.CharField(max_length=20)
     clients = models.ManyToManyField(Client)
+
+    def __str__(self):
+        return self.email
 
     def save(self, *args, **kwargs):
         """
@@ -89,6 +96,9 @@ class Calendar(models.Model):
     """
     summary = models.CharField(max_length=50)
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return "{} {}".format(self.owner.email, self.summary)
 
     def create_event(self, day, start_time, end_time, location):
         """
@@ -254,3 +264,10 @@ class Event(models.Model):
     client = models.OneToOneField(Client, null=True,
                                   on_delete=models.DO_NOTHING)
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{}: {} {} to {}".format(
+            self.calendar.summary,
+            self.day,
+            self.start_time,
+            self.end_time)
