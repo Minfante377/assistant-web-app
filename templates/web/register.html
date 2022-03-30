@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {% load static %}
+      <title>Register</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    </head>
+    <body>
+        {% csrf_token %}
+        <section class="ftco-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-7 col-lg-5">
+                    </div>
+                    {% if err_msg %}
+                    <div class="row justify-content-center">
+                        <label> {{ err_msg }} </label>
+                    </div>
+                    {% endif %}
+                    <form id="register-form" class="signin-form" method="post" action="javascript:sendData(this);">
+                        <div class="form-group mt-3">
+                            <input id="name" type="text" class="form-control" required>
+                            <label class="form-control-placeholder" for="name">Nombre</label>
+                        </div>
+                        <div class="form-group mt-3">
+                            <input id="last-name" type="text" class="form-control" required>
+                            <label class="form-control-placeholder" for="last_name">Apellido</label>
+                        </div>
+                        <div class="form-group mt-3">
+                            <input id="id" type="text" class="form-control" required>
+                            <label class="form-control-placeholder" for="id">DNI</label>
+                        </div>
+                        <div class="form-group mt-3">
+                            <input id="email" type="email" class="form-control" required>
+                            <label class="form-control-placeholder" for="username">Email</label>
+                        </div>
+                        <div class="form-group">
+                            <input id="password" type="password" class="form-control" required>
+                            <label class="form-control-placeholder" for="password">Password</label>
+                            <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                        </div>
+                        <div class="form-group">
+                            <input id="repeat-password" type="password" class="form-control" required>
+                            <label class="form-control-placeholder" for="repeat-password">Repetir Password</label>
+                            <span toggle="#repeat-password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                        </div>
+                        <div class="form-group d-md-flex">
+                            <div class="w-50 text-left">
+                                <label class="checkbox-wrap checkbox-primary mb-0">Dueño
+                                    <input id="is-owner" type="checkbox" checked>
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="w-50 text-left">
+                                <label class="checkbox-wrap checkbox-primary mb-0">Cliente
+                                    <input id="is-client" type="checkbox">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="form-control btn btn-primary rounded submit px-3">Registrarse</button>
+                        </div>
+                    </form>
+                    <script type="text/javascript">
+                        function sendData(page) {
+                            if (document.getElementById("password").value != document.getElementById("repeat-password").value) {
+                                alert("Las passwords no coinciden!")
+                                return;
+                            }
+                            var data = {
+                                is_client: document.getElementById("is-client").checked,
+                                is_owner: document.getElementById("is-owner").checked,
+                                email: document.getElementById("email").value,
+                                password: document.getElementById("password").value,
+                                first_name: document.getElementById("name").value,
+                                last_name: document.getElementById("last-name").value,
+                                identity_number: document.getElementById("id").value
+                            }
+                            $.ajax({
+                                type: 'POST',
+                                url: "{% url 'register_user' %}",
+                                dataType: 'json',
+                                data: JSON.stringify(data),
+                                contentType: 'application/json',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                success: function(data) {
+                                    console.log("Success")
+                                    window.location.href='{% url "login" %}';
+                                    alert("El registro fue realizado con exito!")
+                                },
+                                error: function(data) {
+                                    console.log(data)
+                                    alert(data.statusText)
+                                }
+                            });
+                        }
+                    </script>
+                </div>
+            </div>
+        </section>
+
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script src="{% static 'js/popper.js' %}"></script>
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'js/main.js' %}"></script>
+
+    </body>
+</html>
