@@ -1,3 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
-# Create your views here.
+
+def index(request):
+    """
+    This view redirects the user to the login page.
+    """
+    return redirect(reverse('login'))
+
+
+def login(request):
+    """
+    This view defines the login page.
+    """
+    return render(request, 'login.html')
