@@ -4,6 +4,7 @@ from utils.logger import logger
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password
 
 
 class Client(models.Model):
@@ -19,7 +20,7 @@ class Client(models.Model):
 
     """
     email = models.CharField(unique=True, max_length=50)
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=100)
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     identity_number = models.IntegerField(unique=True)
@@ -27,6 +28,13 @@ class Client(models.Model):
     def __str__(self):
         return "{} {} - {}".format(self.first_name, self.last_name,
                                    self.identity_number)
+
+    def save(self, *args, **kwargs):
+        """
+        This method hashes the password before saving it.
+        """
+        self.password = make_password(self.password)
+        super().save(*args, **kwargs)
 
 
 class Owner(models.Model):
@@ -42,7 +50,7 @@ class Owner(models.Model):
     """
     owner_id = models.IntegerField(null=True, blank=True)
     email = models.CharField(unique=True, max_length=50)
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=100)
     clients = models.ManyToManyField(Client, blank=True)
 
     def __str__(self):
@@ -50,8 +58,10 @@ class Owner(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        This method initializes the owner_id with a 4 random digit integer.
+        This method initializes the owner_id with a 4 random digit integer
+        and hashes the password before saving it.
         """
+        self.password = make_password(self.password)
         self.owner_id = randint(1000, 9999)
         super().save(*args, **kwargs)
 

@@ -40,7 +40,7 @@ class OwnerAdmin(admin.ModelAdmin):
     """
     add_form = OwnerForm
     form = OwnerForm
-    list_display = ['email', 'password', 'owner_id']
+    list_display = ['email', 'owner_id']
     model = Owner
 
     add_fieldsets = (None, {
