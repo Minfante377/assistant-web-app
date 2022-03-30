@@ -12,6 +12,7 @@ class Client(models.Model):
 
     fields:
         - email(str):
+        - password(str):
         - first_name(str):
         - last_name(str):
         - identity_number(int):
@@ -42,7 +43,7 @@ class Owner(models.Model):
     owner_id = models.IntegerField(null=True, blank=True)
     email = models.CharField(unique=True, max_length=50)
     password = models.CharField(max_length=20)
-    clients = models.ManyToManyField(Client)
+    clients = models.ManyToManyField(Client, blank=True)
 
     def __str__(self):
         return self.email
