@@ -24,6 +24,9 @@ class Client(models.Model):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     identity_number = models.IntegerField(unique=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_authenticated = models.BooleanField(default=True)
 
     def __str__(self):
         return "{} {} - {}".format(self.first_name, self.last_name,
@@ -52,6 +55,9 @@ class Owner(models.Model):
     email = models.CharField(unique=True, max_length=50)
     password = models.CharField(max_length=100)
     clients = models.ManyToManyField(Client, blank=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_authenticated = models.BooleanField(default=True)
 
     def __str__(self):
         return self.email

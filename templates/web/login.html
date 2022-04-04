@@ -14,20 +14,35 @@
 
     </head>
     <body>
+        {% csrf_token %}
         <section class="ftco-section">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-md-7 col-lg-5">
                     </div>
-                    <form action="#" class="signin-form">
+                    <form class="signin-form" method="post" action="javascript:sendData(this);">
                         <div class="form-group mt-3">
-                            <input type="email" class="form-control" required>
+                            <input id="email" type="email" class="form-control" required>
                             <label class="form-control-placeholder" for="username">Email</label>
                         </div>
                         <div class="form-group">
-                            <input id="password-field" type="password" class="form-control" required>
+                            <input id="password" type="password" class="form-control" required>
                             <label class="form-control-placeholder" for="password">Password</label>
-                            <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                            <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                        </div>
+                        <div class="form-group d-md-flex">
+                            <div class="w-50 text-left">
+                                <label class="checkbox-wrap checkbox-primary mb-0">Dueño
+                                    <input id="is-owner" type="checkbox">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="w-50 text-left">
+                                <label class="checkbox-wrap checkbox-primary mb-0">Cliente
+                                    <input id="is-client" type="checkbox">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="form-control btn btn-primary rounded submit px-3">Ingresar</button>
@@ -44,6 +59,34 @@
                             </div>
                         </div>
                     </form>
+                    <script type="text/javascript">
+                        function sendData(page) {
+                            var data = {
+                                is_client: document.getElementById("is-client").checked,
+                                is_owner: document.getElementById("is-owner").checked,
+                                email: document.getElementById("email").value,
+                                password: document.getElementById("password").value,
+                            }
+                            $.ajax({
+                                type: 'POST',
+                                url: "{% url 'login_user' %}",
+                                dataType: 'json',
+                                data: JSON.stringify(data),
+                                contentType: 'application/json',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                success: function(data) {
+                                    console.log("Success")
+                                    window.location.href="{% url "user" %}";
+                                },
+                                error: function(data) {
+                                    console.log(data)
+                                    alert(data.statusText)
+                                }
+                            });
+                        }
+                    </script>
                 </div>
             </div>
         </section>

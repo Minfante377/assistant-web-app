@@ -10,5 +10,6 @@ class ErrorMap:
             'solicitud. Por favor revisela e intentelo nuevamente.',
             str(HttpResponseServerError.status_code):
                 'Hubo un error al '
-                'procesar su solicitud. Intentelo nuevamente mas tarde.'
+                'procesar su solicitud. Intentelo nuevamente mas tarde.',
+        '401': 'Usuario o Contraseña incorrecto.'
     }
