@@ -44,6 +44,9 @@ class RegisterUserViewTest(TestCase):
                 'is_owner': True,
                 'email': TEST_EMAIL,
                 'password': TEST_PASSWORD,
+                'first_name': TEST_FIRST_NAME,
+                'last_name': TEST_LAST_NAME,
+                'identity_number': TEST_ID
                 }
         response = self.client.post(
             reverse('register_user'),

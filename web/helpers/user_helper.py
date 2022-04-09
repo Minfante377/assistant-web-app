@@ -9,15 +9,15 @@ def is_client(model_object):
 
     """
     try:
-        model_object.identity_number
-        return True
-    except Exception:
+        model_object.owner_id
         return False
+    except Exception:
+        return True
 
 
 def is_owner(model_object):
     """
-    Defines whether the model_object is a client instance.
+    Defines whether the model_object is an owner instance.
 
     Args:
         model_object(BaseModel):

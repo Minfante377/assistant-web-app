@@ -35,7 +35,10 @@ class TestOwner(TestCase):
             identity_number=TEST_ID_NUMBER)
         self.owner = Owner.objects.create(
             email="test@test.com",
-            password="test")
+            first_name="test",
+            last_name="test",
+            identity_number=TEST_ID_NUMBER,
+            password="test",)
 
     def tearDown(self):
         """

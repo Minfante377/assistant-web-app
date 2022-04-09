@@ -43,13 +43,18 @@ def register_user(msg):
             )
             return HttpResponse.status_code, ''
         except Exception as e:
+            print(e)
             return HttpResponseServerError.status_code, str(e)
 
     try:
         Owner.objects.create(
             email=msg['email'],
-            password=msg['password']
+            password=msg['password'],
+            first_name=msg['first_name'],
+            last_name=msg['last_name'],
+            identity_number=msg['identity_number']
         )
         return HttpResponse.status_code, ''
     except Exception as e:
+        print(e)
         return HttpResponseServerError.status_code, str(e)

@@ -44,7 +44,7 @@ def owner_view(request):
     """
     if user_helper.is_client(request.user):
         return redirect(reverse("client_view"))
-    return render(request, "owner.html")
+    return render(request, "owner.html", context={'owner': True})
 
 
 @login_required(login_url="/login")
@@ -55,7 +55,7 @@ def client_view(request):
     """
     if user_helper.is_owner(request.user):
         return redirect(reverse("owner_view"))
-    return render(request, "client.html")
+    return render(request, "client.html", context={'client': True})
 
 
 @require_http_methods(['POST'])

@@ -1,0 +1,25 @@
+<html>
+<head>
+	<title>{% block title %}Assistant{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+ 
+<body>
+	<div class="sidenav">
+		<a href="#">Mi Perfil</a>
+        {% if owner %}
+		<a href="#">Mis Clientes</a>
+		<a href="#">Mis Turnos Asignados</a>
+		<a href="#">Mis Turnos Disponibles</a>
+        {% endif %}
+        {% if client %}
+		<a href="#">Mis Calendarios</a>
+        {% endif %}
+	</div>
+ 
+	{% block content %}
+	{% endblock %}
+ 
+</body>
+</html>
