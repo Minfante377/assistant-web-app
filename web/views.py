@@ -1,6 +1,6 @@
 import json
 
-from .helpers import login_helper, register_helper
+from .helpers import login_helper, register_helper, user_helper
 from utils.error import error_map
 from utils.logger import logger
 
@@ -38,11 +38,24 @@ def register_view(request):
 
 @login_required(login_url="/login")
 @require_http_methods(['GET'])
-def user_view(request):
+def owner_view(request):
     """
-    This view defines the user page.
+    This view defines the owner page.
     """
-    return render(request, "user.html")
+    if user_helper.is_client(request.user):
+        return redirect(reverse("client_view"))
+    return render(request, "owner.html")
+
+
+@login_required(login_url="/login")
+@require_http_methods(['GET'])
+def client_view(request):
+    """
+    This view defines the client page.
+    """
+    if user_helper.is_owner(request.user):
+        return redirect(reverse("owner_view"))
+    return render(request, "client.html")
 
 
 @require_http_methods(['POST'])

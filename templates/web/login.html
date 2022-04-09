@@ -78,7 +78,11 @@
                                 },
                                 success: function(data) {
                                     console.log("Success")
-                                    window.location.href="{% url "user" %}";
+                                    if (data.is_client === true) {
+                                        window.location.href="{% url "client_view" %}";
+                                    }else {
+                                        window.location.href="{% url "owner_view" %}";
+                                    }
                                 },
                                 error: function(data) {
                                     console.log(data)
