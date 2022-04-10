@@ -76,7 +76,10 @@ class TestCalendar(TestCase):
         """
         self.owner = Owner.objects.create(
             email="test@test.com",
-            password="test")
+            password="test",
+            first_name="test",
+            last_name="test",
+            identity_number=TEST_ID_NUMBER)
         self.calendar = Calendar.objects.create(
             summary="test calendar",
             owner=self.owner)

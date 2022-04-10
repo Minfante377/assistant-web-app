@@ -106,7 +106,10 @@ class LoginUserViewTest(TestCase):
                               first_name=TEST_FIRST_NAME,
                               last_name=TEST_LAST_NAME,
                               identity_number=TEST_ID)
-        Owner.objects.create(email=TEST_EMAIL, password=TEST_PASSWORD)
+        Owner.objects.create(email=TEST_EMAIL, password=TEST_PASSWORD,
+                             first_name=TEST_FIRST_NAME,
+                             last_name=TEST_LAST_NAME,
+                             identity_number=TEST_ID)
 
     def test_login_client(self):
         """
