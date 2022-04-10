@@ -21,7 +21,8 @@ class EmailAuthBackend(BaseBackend):
                 if client:
                     if check_password(password, client.password):
                         return client
-            except Exception:
+            except Exception as e:
+                print(e)
                 return None
 
         if kwargs['is_owner']:
@@ -30,7 +31,8 @@ class EmailAuthBackend(BaseBackend):
                 if owner:
                     if check_password(password, owner.password):
                         return owner
-            except Exception:
+            except Exception as e:
+                print(e)
                 return None
         return None
 

@@ -98,7 +98,7 @@ class Owner(models.Model):
         client = self.clients.all().filter(identity_number=client_id_number)
         if client:
             logger.log_info("Deleting client {}".format(client_id_number))
-            self.clients.remove(client)
+            self.clients.remove(client[0])
             return
 
         logger.log_error("Client {} not found. Unable to delete"

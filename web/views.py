@@ -4,7 +4,7 @@ from .helpers import login_helper, register_helper, user_helper
 from utils.error import error_map
 from utils.logger import logger
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.contrib.auth import login
@@ -45,6 +45,58 @@ def owner_view(request):
     if user_helper.is_client(request.user):
         return redirect(reverse("client_view"))
     return render(request, "owner.html", context={'owner': True})
+
+
+@login_required(login_url="/login")
+@require_http_methods(['GET'])
+def owner_clients_view(request):
+    """
+    This view defines the owner clients list page.
+    """
+    if user_helper.is_client(request.user):
+        return redirect(reverse("client_view"))
+    clients = request.user.clients.all()
+    return render(request, "clients_list.html",
+                  context={'owner': True, 'clients': clients})
+
+
+@login_required(login_url="/login")
+@require_http_methods(['POST'])
+def add_owner_client(request):
+    """
+    Add one client to the owners clients list.
+    """
+    if user_helper.is_client(request.user):
+        return redirect(reverse("client_view"))
+    content = json.loads(request.body.decode('utf-8'))
+    logger.log_info("Trying to add client {}".format(content['email']))
+    try:
+        client = user_helper.get_client(
+            email=content['email'],
+            identity_number=content['identity_number'])
+        request.user.add_client(client)
+        return JsonResponse({})
+    except Exception as err:
+        logger.log_error("Error deleting client: {}".format(err))
+        return HttpResponseBadRequest(reason=err)
+
+
+@login_required(login_url="/login")
+@require_http_methods(['POST'])
+def delete_owner_client(request):
+    """
+    Delete one client from owners clients list.
+    """
+    if user_helper.is_client(request.user):
+        return redirect(reverse("client_view"))
+    content = json.loads(request.body.decode('utf-8'))
+    logger.log_info("Trying to delete client {}".format(content['client_id']))
+    try:
+        request.user.delete_client(content['client_id'])
+        return JsonResponse({})
+    except Exception as err:
+        logger.log_error("Error deleting client: {}".format(err))
+        return HttpResponseBadRequest(reason=err)
 
 
 @login_required(login_url="/login")
@@ -122,4 +174,6 @@ def login_user(request):
 
     logger.log_info("Success loging in user")
     login(request, user)
-    return JsonResponse({})
+    if user_helper.is_client(user):
+        return JsonResponse({"is_client": True})
+    return JsonResponse({"is_client": False})

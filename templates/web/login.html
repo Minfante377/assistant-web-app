@@ -53,7 +53,7 @@
                                 </label>
                             </div>
                             <div class="w-50 text-md-right">
-                            <p class="text-center">Aun no es un usuario? <a style="color: #28a745;"href="{% url 'register' %}">Crear cuenta</a></p>
+                                <p class="text-center">Aun no es un usuario? <a style="color: #28a745;"href="{% url 'register' %}">Crear cuenta</a></p>
                             </div>
                         </div>
                     </form>
@@ -72,14 +72,16 @@
                                 data: JSON.stringify(data),
                                 contentType: 'application/json',
                                 headers: {
-                                    'X-CSRFToken': '{{ csrf_token }}'
+                                    'X-Csrftoken': '{{ csrf_token }}'
                                 },
                                 success: function(data) {
                                     console.log("Success")
                                     if (data.is_client === true) {
                                         window.location.href="{% url "client_view" %}";
+                                        return
                                     }else {
                                         window.location.href="{% url "owner_view" %}";
+                                        return
                                     }
                                 },
                                 error: function(data) {

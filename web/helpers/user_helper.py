@@ -1,3 +1,6 @@
+from ..models import Client
+
+
 def is_client(model_object):
     """
     Defines whether the model_object is a client instance.
@@ -30,3 +33,14 @@ def is_owner(model_object):
         return True
     except Exception:
         return False
+
+
+def get_client(**kwargs):
+    """
+    Get a client based on certain filters.
+
+    Args:
+
+    Returns(Client):
+    """
+    return Client.objects.get(**kwargs)

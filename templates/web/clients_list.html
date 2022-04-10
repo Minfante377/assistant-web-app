@@ -1,0 +1,103 @@
+{% extends "sidebar.html" %}
+
+{% block head %}
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+{% endblock %}
+{% block content %}
+<section class="ftco-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            {% if clients %}
+            <table class="table">
+                <tr class="table-primary">
+                    <td class="table-primary">Nombre</td>
+                    <td class="table-primary">Apellido</td>
+                    <td class="table-primary">DNI</td>
+                    <td class="table-primary">Email</td>
+                    <td class="table-primary"></td>
+                </tr>
+                {% for client in clients %}
+                <tr class="table-secondary">
+                    <td class="table-secondary">{{ client.first_name }}</td>
+                    <td class="table-secondary">{{ client.last_name }}</td>
+                    <td class="table-secondary">{{ client.identity_number }}</td>
+                    <td class="table-secondary">{{ client.email }}</td>
+                    <td class="table-secondary">
+                        <button id="{{ client.identity_number }}" style="background-color: #f44336;" class="form-control btn btn-secondary rounded submit px-3" onclick="deleteClient(this);">Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                <script type="text/javascript">
+                    function deleteClient(client){
+                        var data = {
+                            client_id: client.id,
+                        }
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'delete_owner_client' %}",
+                            dataType: 'json',
+                            data: JSON.stringify(data),
+                            contentType: 'application/json',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            success: function(data) {
+                                console.log("Success")
+                                window.location.href='{% url "owner_clients_view" %}';
+                                alert("Client Eliminado con exito!")
+                            },
+                            error: function(data) {
+                                console.log(data)
+                                alert("No se pudo eliminar al cliente!")
+                            }
+                        });
+                    }
+                </script>
+            </table>
+            {% endif %}
+        </div>
+        <div class="row justify-content-center">
+            <form id="add-client-form" class="signin-form" method="post" action="javascript:sendData(this);">
+                <div class="form-group mt-3">
+                    <input id="id" type="text" class="form-control" required>
+                    <label class="form-control-placeholder" for="id">DNI</label>
+                </div>
+                <div class="form-group mt-3">
+                    <input id="email" type="email" class="form-control" required>
+                    <label class="form-control-placeholder" for="username">Email</label>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="form-control btn btn-primary rounded submit px-3">Añadir Cliente</button>
+                </div>
+            </form>
+            <script type="text/javascript">
+                function sendData(page) {
+                    var data = {
+                        email: document.getElementById("email").value,
+                        identity_number: document.getElementById("id").value
+                    }
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'add_owner_client' %}",
+                        dataType: 'json',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        success: function(data) {
+                            console.log("Success")
+                            window.location.href='{% url "owner_clients_view" %}';
+                        },
+                        error: function(data) {
+                            console.log(data)
+                            alert("No se pudo añadir al cliente!")
+                        }
+                    });
+                }
+            </script>
+        </div>
+    </div>
+    </div>
+</section>
+{% endblock %}

@@ -3,17 +3,20 @@
 	<title>{% block title %}Assistant{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block head %}
+    {% endblock %}
 </head>
  
 <body>
 	<div class="sidenav">
-		<a href="#">Mi Perfil</a>
         {% if owner %}
-		<a href="#">Mis Clientes</a>
+        <a href="{% url 'owner_view' %}">Mi Perfil</a>
+        <a href="{% url 'owner_clients_view' %}">Mis Clientes</a>
 		<a href="#">Mis Turnos Asignados</a>
 		<a href="#">Mis Turnos Disponibles</a>
         {% endif %}
         {% if client %}
+        <a href="{% url 'client_view' %}">Mi Perfil</a>
 		<a href="#">Mis Calendarios</a>
         {% endif %}
 	</div>
