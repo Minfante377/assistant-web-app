@@ -27,6 +27,8 @@ urlpatterns = [
     path('register_user/', views.register_user, name='register_user'),
     path('client/', views.client_view, name='client_view'),
     path('owner/', views.owner_view, name='owner_view'),
+    path('owner/calendar/add', views.add_owner_calendar,
+         name='add_owner_calendar'),
     path('owner_clients/', views.owner_clients_view,
          name='owner_clients_view'),
     path('owner_clients/delete', views.delete_owner_client,

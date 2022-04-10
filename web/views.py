@@ -44,7 +44,9 @@ def owner_view(request):
     """
     if user_helper.is_client(request.user):
         return redirect(reverse("client_view"))
-    return render(request, "owner.html", context={'owner': True})
+    calendar = user_helper.get_owner_calendar(request.user)
+    return render(request, "owner.html",
+                  context={'owner': True, 'calendar': calendar})
 
 
 @login_required(login_url="/login")
@@ -96,6 +98,24 @@ def delete_owner_client(request):
         return JsonResponse({})
     except Exception as err:
         logger.log_error("Error deleting client: {}".format(err))
+        return HttpResponseBadRequest(reason=err)
+
+
+@login_required(login_url="/login")
+@require_http_methods(['POST'])
+def add_owner_calendar(request):
+    """
+    Add a calendar to the owner.
+    """
+    if user_helper.is_client(request.user):
+        return redirect(reverse("client_view"))
+    content = json.loads(request.body.decode('utf-8'))
+    logger.log_info("Trying to add calendar {}".format(content['summary']))
+    try:
+        user_helper.add_owner_calendar(request.user, content['summary'])
+        return JsonResponse({})
+    except Exception as err:
+        logger.log_error("Error adding calendar: {}".format(err))
         return HttpResponseBadRequest(reason=err)
 
 

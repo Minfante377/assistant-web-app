@@ -1,4 +1,4 @@
-from ..models import Client
+from ..models import Client, Calendar
 
 
 def is_client(model_object):
@@ -44,3 +44,33 @@ def get_client(**kwargs):
     Returns(Client):
     """
     return Client.objects.get(**kwargs)
+
+
+def get_owner_calendar(owner):
+    """
+    Get the calendar bounded to an owner.
+
+    Args:
+        - owner(Owner)
+
+    Returns(Calendar|None):
+    """
+    try:
+        return Calendar.objects.get(owner=owner)
+    except Exception:
+        return None
+
+
+def add_owner_calendar(owner, summary):
+    """
+    Add calendar to a certain owner.
+
+    Args:
+        - owner(Owner):
+        - summarty(str):
+
+    Returns(None):
+    """
+    calendar = Calendar.objects.create(summary=summary)
+    calendar.owner = owner
+    calendar.save()

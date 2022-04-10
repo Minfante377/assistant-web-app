@@ -115,7 +115,7 @@ class Calendar(models.Model):
 
     """
     summary = models.CharField(max_length=50)
-    owner = models.ForeignKey(Owner, on_delete=models.CASCADE, null=True)
+    owner = models.OneToOneField(Owner, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return "{} {}".format(self.owner.email, self.summary)
