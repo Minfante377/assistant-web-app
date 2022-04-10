@@ -7,7 +7,7 @@ from utils.logger import logger
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
@@ -177,3 +177,13 @@ def login_user(request):
     if user_helper.is_client(user):
         return JsonResponse({"is_client": True})
     return JsonResponse({"is_client": False})
+
+
+@login_required(login_url="/login")
+@require_http_methods(['GET'])
+def logout_user(request):
+    """
+    This view logouts an existing Client or Owner.
+    """
+    logout(request)
+    return redirect(reverse("login"))
