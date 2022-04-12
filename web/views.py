@@ -67,6 +67,13 @@ def owner_clients_view(request):
 def add_owner_client(request):
     """
     Add one client to the owners clients list.
+
+    input:
+        {'email': str,
+         'identity_number': int
+        }
+
+    response: {'reason': err_msg }
     """
     if user_helper.is_client(request.user):
         return redirect(reverse("client_view"))
@@ -79,7 +86,7 @@ def add_owner_client(request):
         request.user.add_client(client)
         return JsonResponse({})
     except Exception as err:
-        logger.log_error("Error deleting client: {}".format(err))
+        logger.log_error("Error Adding client: {}".format(err))
         return HttpResponseBadRequest(reason=err)
 
 
@@ -88,6 +95,12 @@ def add_owner_client(request):
 def delete_owner_client(request):
     """
     Delete one client from owners clients list.
+
+    input:
+        {'client_id': str}
+
+    response: {'reason': err_msg}
+
     """
     if user_helper.is_client(request.user):
         return redirect(reverse("client_view"))
@@ -106,6 +119,12 @@ def delete_owner_client(request):
 def add_owner_calendar(request):
     """
     Add a calendar to the owner.
+
+    input:
+        { 'summary': str}
+
+    response: {'reason': err_msg}
+
     """
     if user_helper.is_client(request.user):
         return redirect(reverse("client_view"))
