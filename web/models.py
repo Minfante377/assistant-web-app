@@ -1,3 +1,4 @@
+from datetime import timedelta
 from random import randint
 
 from utils.logger import logger
@@ -120,7 +121,8 @@ class Calendar(models.Model):
     def __str__(self):
         return "{} {}".format(self.owner.email, self.summary)
 
-    def create_event(self, day, start_time, end_time, location):
+    def create_event(self, day, start_time, end_time, location,
+                     recurrent=False):
         """
         Creates a new event on this calendar.
 
@@ -129,6 +131,7 @@ class Calendar(models.Model):
             - start_time(time):
             - end_time(time):
             - location(string):
+            - recurrent(bool):
 
         Returns(None):
 
@@ -156,8 +159,15 @@ class Calendar(models.Model):
             location=location,
             calendar=self)
         logger.log_info("New event added")
+        if recurrent:
+            logger.log_info("Creating recurrent event")
+            end_date = day + timedelta(days=365)
+            next_date = day + timedelta(days=7)
+            while next_date < end_date:
+                self.create_event(next_date, start_time, end_time, location)
+                next_date += timedelta(days=7)
 
-    def delete_event(self, day, start_time, end_time):
+    def delete_event(self, day, start_time, end_time, all_events=False):
         """
         Delete an event.
 
@@ -165,13 +175,26 @@ class Calendar(models.Model):
             - day(date):
             - start_time(time):
             - end_time(time):
+            - all_events(bool):
 
         Returns(None):
         """
         logger.log_info("Deleting event {}:{}-{}".format(
                         day, start_time, end_time))
-        Event.objects.filter(calendar=self, day=day, start_time=start_time,
-                             end_time=end_time).delete()
+
+        if all_events:
+            week_day = (day.weekday() + 1) % 7 + 1
+            event = Event.objects.filter(
+                calendar=self,
+                start_time=start_time,
+                end_time=end_time,
+                day__week_day=week_day)
+            event.delete()
+            return
+        Event.objects.filter(
+            calendar=self, day=day,
+            start_time=start_time,
+            end_time=end_time).delete()
 
     def get_events(self, **kwargs):
         """

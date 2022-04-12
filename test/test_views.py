@@ -1,4 +1,4 @@
-from web.models import Calendar, Client, Owner
+from web.models import Calendar, Client, Event, Owner
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.test import TestCase
@@ -6,10 +6,15 @@ from django.urls import reverse
 
 TEST_EMAIL = 'test@test.com'
 TEST_ID = '12345678'
+TEST_LOCATION = 'test'
 TEST_PASSWORD = 'superSafePass'
 TEST_FIRST_NAME = 'john'
 TEST_LAST_NAME = 'doe'
 TEST_SUMMARY = 'test'
+TEST_DATE = '2100-01-01'
+TEST_DATE_RECURRENT = '2100-01-08'
+TEST_START_TIME = '15:30'
+TEST_END_TIME = '16:30'
 
 
 class RegisterUserViewTest(TestCase):
@@ -312,3 +317,138 @@ class AddOwnerCalendarViewTest(TestCase):
 
         self.assertEqual(calendar.summary, TEST_SUMMARY,
                          msg='Calendar was not bounded to owner')
+
+
+class AddEventViewTest(TestCase):
+    """
+    This class implements all the tests for the add_event view.
+    """
+
+    def setUp(self):
+        """
+        Creates an owner and a calendar.
+        """
+        self.user_owner =\
+            Owner.objects.create(email=TEST_EMAIL, password=TEST_PASSWORD,
+                                 first_name=TEST_FIRST_NAME,
+                                 last_name=TEST_LAST_NAME,
+                                 identity_number=TEST_ID)
+        self.calendar = Calendar.objects.create(summary=TEST_SUMMARY,
+                                                owner=self.user_owner)
+
+    def tearDown(self):
+        """
+        Delete test owner.
+        """
+        self.user_owner.delete()
+        self.client.logout()
+
+    def test_add_event(self):
+        """
+        This tests adds a new event to a calendar's owner.
+        """
+        self.client.force_login(self.user_owner)
+        body = {'day': TEST_DATE,
+                'start_time': TEST_START_TIME,
+                'end_time': TEST_END_TIME,
+                'location_name': TEST_LOCATION,
+                'recurrent': False}
+        self.client.post(reverse('add_event'),
+                         body,
+                         content_type='application/json')
+        event = Event.objects.filter(
+                day=TEST_DATE,
+                start_time=TEST_START_TIME,
+                end_time=TEST_END_TIME,
+                calendar=self.calendar)
+        self.assertEqual(len(event), 1, msg='Event was not added')
+
+    def test_add_event_recurrent(self):
+        """
+        This tests adds a new event to a calendar's owner with recurrent
+        option.
+        """
+        self.client.force_login(self.user_owner)
+        body = {'day': TEST_DATE,
+                'start_time': TEST_START_TIME,
+                'end_time': TEST_END_TIME,
+                'location_name': TEST_LOCATION,
+                'recurrent': True}
+        self.client.post(reverse('add_event'),
+                         body,
+                         content_type='application/json')
+        event = Event.objects.filter(
+                start_time=TEST_START_TIME,
+                end_time=TEST_END_TIME,
+                calendar=self.calendar)
+        self.assertGreater(len(event), 2, msg='Event was not added')
+
+
+class DeleteEventViewTest(TestCase):
+    """
+    This class implements all the tests for the delete_event view.
+    """
+
+    def setUp(self):
+        """
+        Creates an owner, a calendar adn two events.
+        """
+        self.user_owner =\
+            Owner.objects.create(email=TEST_EMAIL, password=TEST_PASSWORD,
+                                 first_name=TEST_FIRST_NAME,
+                                 last_name=TEST_LAST_NAME,
+                                 identity_number=TEST_ID)
+        self.calendar = Calendar.objects.create(summary=TEST_SUMMARY,
+                                                owner=self.user_owner)
+        Event.objects.create(day=TEST_DATE, start_time=TEST_START_TIME,
+                             end_time=TEST_END_TIME, location=TEST_LOCATION,
+                             calendar=self.calendar)
+        Event.objects.create(day=TEST_DATE_RECURRENT,
+                             start_time=TEST_START_TIME,
+                             end_time=TEST_END_TIME,
+                             location=TEST_LOCATION,
+                             calendar=self.calendar)
+
+    def tearDown(self):
+        """
+        Delete test owner.
+        """
+        self.user_owner.delete()
+        self.client.logout()
+
+    def test_delete_event(self):
+        """
+        This test deletes an event from the owner's calendar.
+        """
+        self.client.force_login(self.user_owner)
+        body = {
+            'event_info': '{}|{}|{}'
+                          .format(TEST_DATE, TEST_START_TIME, TEST_END_TIME),
+            'all': False
+        }
+        self.client.post(reverse('delete_event'),
+                         body,
+                         content_type='application/json')
+        event = Event.objects.filter(
+                day=TEST_DATE,
+                start_time=TEST_START_TIME,
+                end_time=TEST_END_TIME,
+                calendar=self.calendar)
+        self.assertEqual(len(event), 0, msg='Event was not deleted')
+
+    def test_delete_event_all(self):
+        """
+        This test deletes events from the owners calendar with all
+        option.
+        """
+        self.client.force_login(self.user_owner)
+        body = {
+            'event_info': '{}|{}|{}'
+                          .format(TEST_DATE, TEST_START_TIME, TEST_END_TIME),
+            'all': True
+        }
+        self.client.post(reverse('delete_event'),
+                         body,
+                         content_type='application/json')
+        event = Event.objects.all()
+        self.assertEqual(len(event), 0, msg='Events were not deleted')

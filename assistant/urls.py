@@ -35,5 +35,13 @@ urlpatterns = [
          name='delete_owner_client'),
     path('owner_clients/add', views.add_owner_client,
          name='add_owner_client'),
+    path('available_events/owner/<str:month_filter>&<int:year_filter>',
+         views.available_events_view,
+         name='available_events_view'),
+    path('available_events/owner/',
+         views.available_events_view,
+         name='available_events_view'),
+    path('available_events/add', views.add_event, name='add_event'),
+    path('available_events/delete', views.delete_event, name='delete_event'),
     path('admin/', admin.site.urls),
 ]

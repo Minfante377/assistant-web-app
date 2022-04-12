@@ -1,3 +1,6 @@
+import datetime
+
+from ..consts import Language
 from ..models import Client, Calendar
 
 
@@ -74,3 +77,26 @@ def add_owner_calendar(owner, summary):
     calendar = Calendar.objects.create(summary=summary)
     calendar.owner = owner
     calendar.save()
+
+
+def get_owner_events(owner, **kwargs):
+    """
+    Get all the owner's events for a certain month.
+
+    Args:
+        - owner(Owner):
+
+    Returns(list): list of events
+
+    """
+    month = kwargs.get("month_filter")
+    year = kwargs.get("year_filter")
+    calendar = get_owner_calendar(owner)
+    events = calendar.get_events()
+    if month and year:
+        month =\
+            Language.MONTH.get(month) if Language.MONTH.get(month) else month
+        if isinstance(month, str):
+            month = datetime.datetime.strptime(month, "%B").month
+        events = events.filter(day__year=year, day__month=month)
+    return events

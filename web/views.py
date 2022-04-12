@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from .helpers import login_helper, register_helper, user_helper
 from utils.error import error_map
@@ -135,6 +136,97 @@ def add_owner_calendar(request):
         return JsonResponse({})
     except Exception as err:
         logger.log_error("Error adding calendar: {}".format(err))
+        return HttpResponseBadRequest(reason=err)
+
+
+@login_required(login_url="/login")
+@require_http_methods(['GET'])
+def available_events_view(request):
+    """
+    Define the available events page.
+    """
+    if user_helper.is_client(request.user):
+        return redirect(reverse("client_view"))
+    filter_args = {}
+    filter_args['month_filter'] = request.GET.get('month_filter')
+    filter_args['year_filter'] = request.GET.get('year_filter')
+    if not filter_args['month_filter']:
+        filter_args['month_filter'] = datetime.now().month
+        filter_args['year_filter'] = datetime.now().year
+    events = user_helper.get_owner_events(
+        request.user,
+        month_filter=filter_args.get('month_filter'),
+        year_filter=filter_args.get('year_filter'))
+    language = request.META.get('HTTP_ACCEPT_LANGUAGE', ['es', ])
+    return render(
+        request, 'available_times.html',
+        context={'events': events, 'owner': True, 'language': language})
+
+
+@login_required(login_url="/login")
+@require_http_methods(['POST'])
+def add_event(request):
+    """
+    Add a new event to the available times list on the owners calendar.
+
+    input:
+        {
+            'day': datetime.date,
+            'start_time': datetime.time,
+            'end_time': datetime.time,
+            'location_name': str
+            'recurrent': bool
+        }
+
+    response: {'reason': err_msg}
+    """
+    if user_helper.is_client(request.user):
+        return redirect(reverse("client_view"))
+    calendar = user_helper.get_owner_calendar(request.user)
+    content = json.loads(request.body.decode('utf-8'))
+    logger.log_info("Trying to add event {}".format(content))
+    try:
+        calendar.create_event(
+            datetime.strptime(content['day'], "%Y-%m-%d").date(),
+            datetime.strptime(content['start_time'], "%H:%M").time(),
+            datetime.strptime(content['end_time'], "%H:%M").time(),
+            content['location_name'],
+            content['recurrent'])
+        return JsonResponse({})
+    except Exception as err:
+        logger.log_error("Error adding event: {}".format(err))
+        return HttpResponseBadRequest(reason=err)
+
+
+@login_required(login_url="/login")
+@require_http_methods(['POST'])
+def delete_event(request):
+    """
+    Deletes an/multiple event of the available
+    times list on the owners calendar.
+
+    input:
+        {
+            event_info: str,
+            all: bool
+        }
+
+    response: {'reason': err_msg}
+    """
+    calendar = user_helper.get_owner_calendar(request.user)
+    content = json.loads(request.body.decode('utf-8'))
+    logger.log_info("Trying to delete event {}".format(content))
+    try:
+        day, start_time, end_time = content['event_info'].split("|")
+        calendar.delete_event(
+            datetime.strptime(day, "%Y-%m-%d").date(),
+            start_time,
+            end_time,
+            all_events=content['all'])
+        return JsonResponse({})
+    except Exception as err:
+        print(err)
+        logger.log_error("Error adding event: {}".format(err))
         return HttpResponseBadRequest(reason=err)
 
 
