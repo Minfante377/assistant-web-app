@@ -1,0 +1,123 @@
+{% extends "sidebar.html" %}
+
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+{% load i18n %}
+{% endblock %}
+{% block content %}
+<section class="ftco-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            {% if events %}
+            <table class="table">
+                <tr class="table-primary">
+                    <td class="table-primary">Fecha</td>
+                    <td class="table-primary">Hora</td>
+                    <td class="table-primary">Lugar</td>
+                    <td class="table-primary">Cliente</td>
+                    <td class="table-primary"></td>
+                </tr>
+                {% for event in events %}
+                <tr class="table-secondary">
+                    {% language '{{ language }}' %}
+                    <td class="table-secondary">{{ event.day }}</td>
+                    {% endlanguage %}
+                    <td class="table-secondary">{{ event.start_time }} - {{ event.end_time }}</td>
+                    <td class="table-secondary">{{ event.location }}</td>
+                    <td class="table-secondary">{{ event.client.first_name }} {{ event.client.last_name }} - {{ event.client.email }}</td>
+                    <td>
+                        <div>
+                            <button id="{{ event.day|date:"Y-m-d" }}|{{ event.start_time|date:"H:i:s.u" }}|{{ event.end_time|date:"H:i:s.u" }}" style="background-color: #f44336;" class="form-control btn btn-secondary rounded submit px-3" onclick="deleteEvent(this);">Cancelar</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                <script type="text/javascript">
+                    function deleteEvent(button){
+                        var all = false;
+                        var data = {
+                            event_info: button.id,
+                        }
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'cancel_event' %}",
+                            dataType: 'json',
+                            data: JSON.stringify(data),
+                            contentType: 'application/json',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            success: function(data) {
+                                console.log("Success")
+                                window.location.href='{% url "taken_events_view" %}';
+                                alert("Evento cancelado con exito!")
+                            },
+                            error: function(data) {
+                                console.log(data)
+                                alert("No se pudo eliminar el Evento!")
+                            }
+                        });
+                    }
+                </script>
+            </table>
+            {% endif %}
+        </div>
+        <div class="row justify-content-center">
+            <form id="filter-form" class="signin-form" method="post" action="javascript:sendFilter(this);" style="margin-left:50">
+                <div class="form-group mt-3">
+                    <select id="month_filter" class="form-control">
+                        <option>Enero</option>
+                        <option>Febrero</option>
+                        <option>Marzo</option>
+                        <option>Abril</option>
+                        <option>Mayo</option>
+                        <option>Junio</option>
+                        <option>Agosto</option>
+                        <option>Septiembre</option>
+                        <option>Octubre</option>
+                        <option>Noviembre</option>
+                        <option>Diciembre</option>
+                    </select>
+                    <label class="data-label" for="month_filter">Mes</label>
+                </div>
+                <div class="form-group mt-3">
+                    <select id="year_filter" class="form-control">
+                        {% now "Y" as current_year %}
+                        {% for i in '01234'|make_list %}
+                        <option> {{ current_year|add:i }} </option>
+                        {% endfor %}
+                    </select>
+                    <label class="data-label" for="year_filter">Año</label>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="form-control btn btn-primary rounded submit px-3">Filtrar</button>
+                </div>
+            </form>
+            <script type="text/javascript">
+                function sendFilter(page) {
+                    var data = {
+                        month_filter: document.getElementById("month_filter").value,
+                        year_filter: document.getElementById("year_filter").value
+                    }
+                    $.ajax({
+                        type: 'GET',
+                        url: "{% url 'taken_events_view' %}",
+                        data: data,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        success: function(data) {
+                            $("body").html(data);
+                            console.log("Success")
+                        },
+                        error: function(data) {
+                            console.log("Failure")
+                            alert("No se pudo aplicar el filtro!")
+                        }
+                    });
+                }
+            </script>
+        </div>
+    </div>
+</section>
+{% endblock %}
