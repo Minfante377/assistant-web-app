@@ -43,7 +43,7 @@ def register_user(msg):
             )
             return HttpResponse.status_code, ''
         except Exception as e:
-            print(e)
+            print("Client error: {}".format(e))
             return HttpResponseServerError.status_code, str(e)
 
     try:

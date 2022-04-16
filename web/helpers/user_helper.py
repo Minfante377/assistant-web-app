@@ -1,7 +1,7 @@
 import datetime
 
 from ..consts import Language
-from ..models import Client, Calendar
+from ..models import Client, Calendar, Owner
 
 
 def is_client(model_object):
@@ -101,4 +101,48 @@ def get_owner_events(owner, **kwargs):
         if isinstance(month, str):
             month = datetime.datetime.strptime(month, "%B").month
         events = events.filter(day__year=year, day__month=month, **kwargs)
+    return events
+
+
+def get_client_calendars(client, **kwargs):
+    """
+    Get all the owners calendars associated to the client.
+
+    Args:
+        - client(Client):
+
+    Return(list):
+    """
+    owners = Owner.objects.all()
+    calendars = [owner.calendar for owner in owners
+                 if owner.clients.filter(id=client.id)]
+    _id = kwargs.get('id')
+    if _id:
+        calendar = list(filter(lambda x: x.id == _id, calendars))
+        calendars = calendar
+    return calendars
+
+
+def get_client_events(calendar, **kwargs):
+    """
+    Get all the client's events for a certain month.
+
+    Args:
+        - client(Client):
+
+    Returns(list): list of events
+
+    """
+    month = kwargs.get("month_filter")
+    year = kwargs.get("year_filter")
+    events = calendar.get_events()
+    if month and year:
+        kwargs.pop('month_filter')
+        kwargs.pop('year_filter')
+        month =\
+            Language.MONTH.get(month) if Language.MONTH.get(month) else month
+        if isinstance(month, str):
+            month = datetime.datetime.strptime(month, "%B").month
+        events = events.filter(day__year=year, day__month=month,
+                               **kwargs)
     return events

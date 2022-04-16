@@ -225,7 +225,6 @@ def delete_event(request):
             all_events=content['all'])
         return JsonResponse({})
     except Exception as err:
-        print(err)
         logger.log_error("Error adding event: {}".format(err))
         return HttpResponseBadRequest(reason=err)
 
@@ -280,7 +279,6 @@ def cancel_event(request):
             end_time)
         return JsonResponse({})
     except Exception as err:
-        print(err)
         logger.log_error("Error canceling event: {}".format(err))
         return HttpResponseBadRequest(reason=err)
 
@@ -294,6 +292,77 @@ def client_view(request):
     if user_helper.is_owner(request.user):
         return redirect(reverse("owner_view"))
     return render(request, "client.html", context={'client': True})
+
+
+@login_required(login_url="/login")
+@require_http_methods(['GET'])
+def schedule_event_view(request):
+    """
+    This view defines the schedule event page.
+    """
+    if user_helper.is_owner(request.user):
+        return redirect(reverse("owner_view"))
+    filter_args = {}
+    filter_args['month_filter'] = request.GET.get('month_filter')
+    filter_args['year_filter'] = request.GET.get('year_filter')
+    client_calendars = user_helper.get_client_calendars(request.user)
+    if not client_calendars:
+        return render(request, "schedule_event.html",
+                      context={'client': True, 'events': []})
+
+    if not filter_args['month_filter']:
+        filter_args['month_filter'] = datetime.now().month
+        filter_args['year_filter'] = datetime.now().year
+        filter_args['calendar'] = client_calendars[0]
+    else:
+        calendar = request.GET['calendar_filter'].split("|")[0].strip()
+        filter_args['calendar'] =\
+            list(filter(lambda x: x.summary == calendar, client_calendars))[0]
+    events = user_helper.get_client_events(
+        calendar=filter_args['calendar'],
+        month_filter=filter_args.get('month_filter'),
+        year_filter=filter_args.get('year_filter'),
+        free=True)
+    return render(request, "schedule_event.html",
+                  context={'client': True, 'events': events,
+                           'calendar': filter_args['calendar'],
+                           'client_calendars': client_calendars})
+
+
+@login_required(login_url="/login")
+@require_http_methods(['POST'])
+def schedule_event(request):
+    """
+    schedule an event.
+
+    input:
+        {
+            'day': datetime.date,
+            'start_time': datetime.time,
+            'end_time': datetime.time,
+            'location_name': str,
+            'calendar': str
+        }
+
+    response: {'reason': err_msg}
+    """
+    if user_helper.is_owner(request.user):
+        return redirect(reverse("owner_view"))
+    content = json.loads(request.body.decode('utf-8'))
+    calendar = user_helper.get_client_calendars(request.user,
+                                                id=content['calendar'])[0]
+    logger.log_info("Trying to add event {}".format(content))
+    try:
+        day, start_time, end_time = content['event_info'].split("|")
+        calendar.assign_event(
+            request.user.identity_number,
+            datetime.strptime(day, "%Y-%m-%d").date(),
+            start_time,
+            end_time)
+        return JsonResponse({})
+    except Exception as err:
+        logger.log_error("Error adding event: {}".format(err))
+        return HttpResponseBadRequest(reason=err)
 
 
 @require_http_methods(['POST'])

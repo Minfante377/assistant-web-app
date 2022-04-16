@@ -508,3 +508,60 @@ class CancelEventViewTest(TestCase):
         self.event.refresh_from_db()
         self.assertEqual(self.event.free, True, msg='Event was not canceled')
         self.assertIsNone(self.event.client, msg='Event was not canceled')
+
+
+class ScheduleEventViewTest(TestCase):
+    """
+    This class implements all the tests for the schedule_event view.
+    """
+
+    def setUp(self):
+        """
+        Creates an owner, a client, a calendar and one event.
+        """
+        self.user_owner =\
+            Owner.objects.create(email=TEST_EMAIL, password=TEST_PASSWORD,
+                                 first_name=TEST_FIRST_NAME,
+                                 last_name=TEST_LAST_NAME,
+                                 identity_number=TEST_ID)
+        self.user_client =\
+            Client.objects.create(email=TEST_EMAIL, password=TEST_PASSWORD,
+                                  first_name=TEST_FIRST_NAME,
+                                  last_name=TEST_LAST_NAME,
+                                  identity_number=TEST_ID)
+
+        self.calendar = Calendar.objects.create(summary=TEST_SUMMARY,
+                                                owner=self.user_owner)
+        self.event = Event.objects.create(
+            day=TEST_DATE,
+            start_time=TEST_START_TIME,
+            end_time=TEST_END_TIME,
+            location=TEST_LOCATION,
+            calendar=self.calendar,
+            free=False,
+            client=self.user_client)
+
+    def tearDown(self):
+        """
+        Delete test owner.
+        """
+        self.user_owner.delete()
+        self.user_client.delete()
+        self.client.logout()
+
+    def test_schedule_event(self):
+        """
+        This test schedules an event from the owner's calendar.
+        """
+        self.client.force_login(self.user_owner)
+        body = {
+            'event_info': '{}|{}|{}'
+                          .format(TEST_DATE, TEST_START_TIME, TEST_END_TIME),
+            'calendar': self.calendar.id
+        }
+        self.client.post(reverse('schedule_event'),
+                         body,
+                         content_type='application/json')
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.free, False, msg='Event was not scheduled')
+        self.assertIsNotNone(self.event.client, msg='Event was not scheduled')

@@ -17,7 +17,7 @@
         {% endif %}
         {% if client %}
         <a href="{% url 'client_view' %}">Mi Perfil</a>
-		<a href="#">Agendar</a>
+        <a href="{% url 'schedule_event_view' %}">Agendar</a>
         {% endif %}
         <a href="{% url 'logout' %}">Salir</a>
 	</div>

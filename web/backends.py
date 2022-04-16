@@ -22,7 +22,7 @@ class EmailAuthBackend(BaseBackend):
                     if check_password(password, client.password):
                         return client
             except Exception as e:
-                print(e)
+                print("Client register error: {}".format(e))
                 return None
 
         if kwargs['is_owner']:
