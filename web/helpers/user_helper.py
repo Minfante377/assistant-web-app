@@ -94,9 +94,11 @@ def get_owner_events(owner, **kwargs):
     calendar = get_owner_calendar(owner)
     events = calendar.get_events()
     if month and year:
+        kwargs.pop('month_filter')
+        kwargs.pop('year_filter')
         month =\
             Language.MONTH.get(month) if Language.MONTH.get(month) else month
         if isinstance(month, str):
             month = datetime.datetime.strptime(month, "%B").month
-        events = events.filter(day__year=year, day__month=month)
+        events = events.filter(day__year=year, day__month=month, **kwargs)
     return events

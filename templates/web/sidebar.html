@@ -12,7 +12,7 @@
         {% if owner %}
         <a href="{% url 'owner_view' %}">Mi Perfil</a>
         <a href="{% url 'owner_clients_view' %}">Mis Clientes</a>
-        <a href="#">Mis Turnos Asignados</a>
+        <a href="{% url 'taken_events_view' %}">Mis Turnos Asignados</a>
 		<a href="{% url 'available_events_view' %}">Mis Turnos Disponibles</a>
         {% endif %}
         {% if client %}

@@ -232,6 +232,61 @@ def delete_event(request):
 
 @login_required(login_url="/login")
 @require_http_methods(['GET'])
+def taken_events_view(request):
+    """
+    Define the taken events page.
+    """
+    if user_helper.is_client(request.user):
+        return redirect(reverse("client_view"))
+    filter_args = {}
+    filter_args['month_filter'] = request.GET.get('month_filter')
+    filter_args['year_filter'] = request.GET.get('year_filter')
+    if not filter_args['month_filter']:
+        filter_args['month_filter'] = datetime.now().month
+        filter_args['year_filter'] = datetime.now().year
+    events = user_helper.get_owner_events(
+        request.user,
+        month_filter=filter_args.get('month_filter'),
+        year_filter=filter_args.get('year_filter'),
+        free=False)
+    language = request.META.get('HTTP_ACCEPT_LANGUAGE', ['es', ])
+    return render(
+        request, 'taken_times.html',
+        context={'events': events, 'owner': True, 'language': language})
+
+
+@login_required(login_url="/login")
+@require_http_methods(['POST'])
+def cancel_event(request):
+    """
+    Cancel an event of the taken
+    times list on the owners calendar.
+
+    input:
+        {
+            event_info: str,
+        }
+
+    response: {'reason': err_msg}
+    """
+    calendar = user_helper.get_owner_calendar(request.user)
+    content = json.loads(request.body.decode('utf-8'))
+    logger.log_info("Trying to cancel event {}".format(content))
+    try:
+        day, start_time, end_time = content['event_info'].split("|")
+        calendar.free_event(
+            datetime.strptime(day, "%Y-%m-%d").date(),
+            start_time,
+            end_time)
+        return JsonResponse({})
+    except Exception as err:
+        print(err)
+        logger.log_error("Error canceling event: {}".format(err))
+        return HttpResponseBadRequest(reason=err)
+
+
+@login_required(login_url="/login")
+@require_http_methods(['GET'])
 def client_view(request):
     """
     This view defines the client page.
