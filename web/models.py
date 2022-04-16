@@ -20,6 +20,7 @@ class Client(models.Model):
         - identity_number(int):
 
     """
+    id = models.IntegerField(primary_key=True)
     email = models.CharField(unique=True, max_length=50)
     password = models.CharField(max_length=100)
     first_name = models.CharField(max_length=20)
@@ -38,6 +39,7 @@ class Client(models.Model):
         This method hashes the password before saving it.
         """
         self.password = make_password(self.password)
+        self.id = int("2{}".format(str(self.identity_number)))
         super().save(*args, **kwargs)
 
 
@@ -52,6 +54,7 @@ class Owner(models.Model):
         - clients(ManyToManyField): Clients associated with this owner.
 
     """
+    id = models.IntegerField(primary_key=True)
     owner_id = models.IntegerField(null=True, blank=True)
     email = models.CharField(unique=True, max_length=50)
     password = models.CharField(max_length=100)
@@ -71,6 +74,7 @@ class Owner(models.Model):
         This method initializes the owner_id with a 4 random digit integer
         and hashes the password before saving it.
         """
+        self.id = int("1{}".format(str(self.identity_number)))
         self.password = make_password(self.password)
         self.owner_id = randint(1000, 9999)
         super().save(*args, **kwargs)
