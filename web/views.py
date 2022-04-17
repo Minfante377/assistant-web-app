@@ -344,31 +344,24 @@ def scheduled_event_view(request):
     """
     if user_helper.is_owner(request.user):
         return redirect(reverse("owner_view"))
-    filter_args = {}
-    filter_args['month_filter'] = request.GET.get('month_filter')
-    filter_args['year_filter'] = request.GET.get('year_filter')
+    calendar = request.GET.get("calendar")
     client_calendars = user_helper.get_client_calendars(request.user)
     if not client_calendars:
         return render(request, "scheduled_event.html",
                       context={'client': True, 'events': []})
 
-    if not filter_args['month_filter']:
-        filter_args['month_filter'] = datetime.now().month
-        filter_args['year_filter'] = datetime.now().year
-        filter_args['calendar'] = client_calendars[0]
+    if not calendar:
+        calendar = client_calendars[0]
     else:
-        calendar = request.GET['calendar_filter'].split("|")[0].strip()
-        filter_args['calendar'] =\
+        calendar =\
             list(filter(lambda x: x.summary == calendar, client_calendars))[0]
     events = user_helper.get_client_events(
-        calendar=filter_args['calendar'],
-        month_filter=filter_args.get('month_filter'),
-        year_filter=filter_args.get('year_filter'),
+        calendar=calendar,
         free=False,
         client=request.user)
     return render(request, "scheduled_event.html",
                   context={'client': True, 'events': events,
-                           'calendar': filter_args['calendar'],
+                           'calendar': calendar,
                            'client_calendars': client_calendars})
 
 

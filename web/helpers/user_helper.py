@@ -145,4 +145,6 @@ def get_client_events(calendar, **kwargs):
             month = datetime.datetime.strptime(month, "%B").month
         events = events.filter(day__year=year, day__month=month,
                                **kwargs)
+        return events
+    events = events.filter(**kwargs)
     return events

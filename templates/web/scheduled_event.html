@@ -25,7 +25,7 @@
                     <td class="table-secondary">{{ event.location }}</td>
                     <td class="table-secondary">
                         <div>
-                            <button id="{{ event.day|date:"Y-m-d" }}|{{ event.start_time|date:"H:i:s.u" }}|{{ event.end_time|date:"H:i:s.u" }}" class="form-control btn btn-primary rounded submit px-3" onclick="deleteEvent(this, {{ event.calendar.id }});">Cancelar</button>
+                            <button id="{{ event.day|date:"Y-m-d" }}|{{ event.start_time|date:"H:i:s.u" }}|{{ event.end_time|date:"H:i:s.u" }}" style="background-color: #f44336;" class="form-control btn btn-secondary rounded submit px-3" onclick="deleteEvent(this, {{ event.calendar.id }});">Cancelar</button>
                         </div>
                     </td>
                 </tr>
@@ -64,31 +64,6 @@
         <div class="row justify-content-center">
             <form id="add-client-form" class="signin-form" method="post" action="javascript:sendFilter(this);" style="margin-left:50">
                 <div class="form-group mt-3">
-                    <select id="month_filter" class="form-control">
-                        <option>Enero</option>
-                        <option>Febrero</option>
-                        <option>Marzo</option>
-                        <option>Abril</option>
-                        <option>Mayo</option>
-                        <option>Junio</option>
-                        <option>Agosto</option>
-                        <option>Septiembre</option>
-                        <option>Octubre</option>
-                        <option>Noviembre</option>
-                        <option>Diciembre</option>
-                    </select>
-                    <label class="data-label" for="month_filter">Mes</label>
-                </div>
-                <div class="form-group mt-3">
-                    <select id="year_filter" class="form-control">
-                        {% now "Y" as current_year %}
-                        {% for i in '01234'|make_list %}
-                        <option> {{ current_year|add:i }} </option>
-                        {% endfor %}
-                    </select>
-                    <label class="data-label" for="year_filter">Año</label>
-                </div>
-                <div class="form-group mt-3">
                     <select id="calendar_filter" class="form-control">
                         {% for calendar in client_calendars %}
                         <option>{{ calendar.summary }} | {{ calendar.owner.first_name }} {{ calendar.owner.last_name }}</option>
@@ -103,8 +78,6 @@
             <script type="text/javascript">
                 function sendFilter(page) {
                     var data = {
-                        month_filter: document.getElementById("month_filter").value,
-                        year_filter: document.getElementById("year_filter").value,
                         calendar_filter: document.getElementById("calendar_filter").value
                     }
                     $.ajax({
