@@ -476,6 +476,7 @@ class CancelEventViewTest(TestCase):
 
         self.calendar = Calendar.objects.create(summary=TEST_SUMMARY,
                                                 owner=self.user_owner)
+        self.user_owner.clients.add(self.user_client)
         self.event = Event.objects.create(
             day=TEST_DATE,
             start_time=TEST_START_TIME,
@@ -493,7 +494,7 @@ class CancelEventViewTest(TestCase):
         self.user_client.delete()
         self.client.logout()
 
-    def test_cancel_event(self):
+    def test_cancel_event_owner(self):
         """
         This test cancel an event from the owner's calendar.
         """
@@ -501,6 +502,23 @@ class CancelEventViewTest(TestCase):
         body = {
             'event_info': '{}|{}|{}'
                           .format(TEST_DATE, TEST_START_TIME, TEST_END_TIME),
+        }
+        self.client.post(reverse('cancel_event'),
+                         body,
+                         content_type='application/json')
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.free, True, msg='Event was not canceled')
+        self.assertIsNone(self.event.client, msg='Event was not canceled')
+
+    def test_cancel_event_client(self):
+        """
+        This test cancel an event from the owner's calendar as a client.
+        """
+        self.client.force_login(self.user_client)
+        body = {
+            'event_info': '{}|{}|{}'
+                          .format(TEST_DATE, TEST_START_TIME, TEST_END_TIME),
+            'calendar': self.calendar.id
         }
         self.client.post(reverse('cancel_event'),
                          body,

@@ -28,6 +28,8 @@ urlpatterns = [
     path('client/', views.client_view, name='client_view'),
     path('client/schedule', views.schedule_event_view,
          name='schedule_event_view'),
+    path('client/scheduled', views.scheduled_event_view,
+         name='scheduled_event_view'),
     path('client/schedule/new', views.schedule_event,
          name='schedule_event'),
     path('owner/', views.owner_view, name='owner_view'),
